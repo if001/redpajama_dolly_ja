@@ -39,7 +39,7 @@ def main():
     parser.add_argument('--batch_size', default=1)
     parser.add_argument('--grad_ac', default=8)
     parser.add_argument('--epoch', default=10)
-    parser.add_argument('--resume', action='resume')    
+    parser.add_argument('--resume', action='store_true')
     args = parser.parse_args()
 
 
