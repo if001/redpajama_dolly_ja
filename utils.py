@@ -28,10 +28,10 @@ def prepare_dataset(tokenizer):
         tokenize_example, 
         batched=False
     )
-    train_size = int(len(ds) * 0.95)
-    val_size = len(ds) - train_size
-    train_data, val_data = torch.utils.data.random_split(dataset=ds, lengths=[train_size, val_size], generator=torch.Generator().manual_seed(42))
-    print("data_set:", len(ds))    
+    d = ds['train'].train_test_split(test_size=0.1)
+    train_data = d['train']
+    val_data = d['test']
+    print("data_set:", len(d))
     print("train_data:", len(train_data))
     print("val_data:", len(val_data))
     return train_data, val_data
