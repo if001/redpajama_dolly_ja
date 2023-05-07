@@ -1,5 +1,4 @@
 datasets
 transformers
-composer
 torch
 accelerate
