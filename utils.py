@@ -22,7 +22,7 @@ def prepare_dataset(tokenizer):
 
     def tokenize_example(example):
         example = format(example)
-        return tokenizer(text=example['prompt'], text_target=example['response'], max_length=2048, padding=True)
+        return tokenizer(text=example['prompt'], text_target=example['response'])
     # columns_to_remove = list(ds[0].keys())
     ds = ds.map(
         tokenize_example, 

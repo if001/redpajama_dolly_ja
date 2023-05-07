@@ -70,7 +70,7 @@ def main():
         )
     data_collator = DataCollatorForSeq2Seq(
         tokenizer=tokenizer,
-        padding=True,
+        padding='max_length',
         max_length=2048,
         )  
     trainer = Trainer(
