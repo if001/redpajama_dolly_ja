@@ -35,8 +35,7 @@ def load_model(model_name):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name, 
                                                  device_map='auto', 
-                                                 torch_dtype=torch.float16, 
-                                                 load_in_8bit=True)
+                                                 torch_dtype=torch.float16)                                                 
     print("load model:", model_name)
     return tokenizer, model
 
