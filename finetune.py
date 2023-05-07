@@ -47,7 +47,7 @@ def main():
     tokenizer, model = load_model(model_name)
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
-    train_data, val_data = prepare_dataset(tokenizer)
+    train_dataset = prepare_dataset(tokenizer)
     
     # model.to(get_device())
     # print('model is cuda', model.device)
@@ -68,18 +68,16 @@ def main():
         save_total_limit=3,
         fp16 = True,
         gradient_checkpointing= True,
-        optim="adafactor"
+        optim="adafactor",
+        warmup_steps=100
         )
     data_collator = DataCollatorForSeq2Seq(
         tokenizer=tokenizer,
-        padding='max_length',
-        max_length=2048
         )  
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=train_data,
-        eval_dataset=val_data,
+        train_dataset=train_dataset['train'],
         tokenizer=tokenizer,
         data_collator=data_collator,
         callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
