@@ -18,8 +18,9 @@ def format(inp):
 
 
 def prepare_dataset(tokenizer):    
-    ds_path = 'https://huggingface.co/datasets/kunishou/databricks-dolly-15k-ja/resolve/main/databricks-dolly-15k-ja.json'
-    ds = load_dataset('json', data_files=ds_path)
+    # ds_path = 'https://huggingface.co/datasets/kunishou/databricks-dolly-15k-ja/resolve/main/databricks-dolly-15k-ja.json'
+    # ds = load_dataset('json', data_files=ds_path)
+    ds = load_dataset('kunishou/databricks-dolly-15k-ja')
 
     def tokenize_example(example):
         example = format(example)
