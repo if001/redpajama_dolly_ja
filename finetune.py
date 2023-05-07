@@ -52,7 +52,7 @@ def main():
 
     collate_fn = DataCollatorForSeq2Seq(
         tokenizer=tokenizer,
-        max_seq_len=1024,
+        max_length=1024,
     )
     train_dataloader = DataLoader(ds,
             collate_fn=collate_fn,

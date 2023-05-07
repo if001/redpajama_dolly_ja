@@ -1,7 +1,6 @@
 from datasets import load_dataset
 
-def format(inp):
-    print('inp:', inp['instruction'])
+def format(inp):    
     PROMPT_FORMAT = '以下は、あるタスクを記述した指示です。依頼を適切に完了させる回答を書きなさい。\n\n### 指示:\n{instruction}\n\n### 応答:\n'
     try:
         if inp['input'] != '':
