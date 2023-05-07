@@ -80,7 +80,7 @@ def main():
         run_name='redpajama_dolly_ja',
         model=model,
         train_dataloader=train_dataloader,
-        eval_loader=[eval_loader],
+        eval_dataloader=[eval_loader],
         tokenizer=tokenizer,
         optimizers=optimizer,
         schedulers=scheduler,
