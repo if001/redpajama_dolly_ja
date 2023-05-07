@@ -109,11 +109,10 @@ def main():
         args=training_args,
         train_dataset=train_dataset['train'],
         tokenizer=tokenizer,
-        data_collator=data_collator,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+        data_collator=data_collator        
         )
     print("train...")
-    trainer.train(args.resume)
+    trainer.train(resume_from_checkpoin=False)
     
     if args.lora:
         model.save_pretrained("alpaca-lora-dolly-2.0")
