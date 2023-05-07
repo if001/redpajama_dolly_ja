@@ -65,7 +65,7 @@ def main():
     )
     eval_loader = Evaluator(label='eval',
                             dataloader=eval_dataloader,
-                            metric_names=list(model.train_metrics.keys()))
+                            metric_names=['loss', 'accuracy'])
     
     # model.to(get_device())
     print('model is cuda', model.device)
