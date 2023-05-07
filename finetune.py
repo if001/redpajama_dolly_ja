@@ -75,7 +75,8 @@ def main():
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
         mlm=False
-        )  
+        )
+    model.config.use_cache = False
     trainer = Trainer(
         model=model,
         args=training_args,
