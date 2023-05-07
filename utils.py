@@ -35,3 +35,11 @@ def prepare_dataset(tokenizer):
     # print("train_data:", len(train_data))
     # print("val_data:", len(val_data))
     return ds
+
+def get_device():
+    import torch
+    if torch.cuda.is_available():
+        print("use gpu...")
+        return "cuda:0"
+    else:
+        return "cpu"
