@@ -1,20 +1,14 @@
 import argparse
-from typing import Optional, Tuple
 
 import torch
-from torch.utils.data import DataLoader
-# from dataclasses import dataclass, field
-from transformers import AutoTokenizer, AutoModelForCausalLM, DataCollatorForSeq2Seq
-
-from composer import Trainer, algorithms
-from composer.core import Evaluator
-from composer.optim import DecoupledAdamW
-from composer.optim.scheduler import LinearWithWarmupScheduler
-
-MIN_TRANSFORMERS_VERSION = '4.25.1'
-# check transformers version
-import transformers
-assert transformers.__version__ >= MIN_TRANSFORMERS_VERSION, f'Please upgrade transformers to version {MIN_TRANSFORMERS_VERSION} or higher.'
+from transformers import (
+    AutoTokenizer, 
+    AutoModelForCausalLM,
+    Trainer,
+    DataCollatorForSeq2Seq,
+    Seq2SeqTrainingArguments,
+    EarlyStoppingCallback
+)
 
 from utils import (
     prepare_dataset,
@@ -41,59 +35,53 @@ def load_model(model_name):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-o', '--out', help='output dir', default='/content/MyDrive/models/redpajama_dolly_ja')
+    parser.add_argument('--out_dir', default='/content/MyDrive/models/redpajama_dolly_ja')
+    parser.add_argument('--batch_size', default=1)
+    parser.add_argument('--grad_ac', default=8)
+    parser.add_argument('--epoch', default=10)
+    parser.add_argument('--resume', action='resume')    
     args = parser.parse_args()
 
 
     model_name = "togethercomputer/RedPajama-INCITE-Base-3B-v1"
     tokenizer, model = load_model(model_name)
 
-    ds = prepare_dataset(tokenizer)
-
-    collate_fn = DataCollatorForSeq2Seq(
-        tokenizer=tokenizer,
-        max_length=1024,
-    )
-    train_dataloader = DataLoader(ds,
-            collate_fn=collate_fn,
-            batch_size=1
-    )
-
-    eval_dataloader = DataLoader(ds,
-            collate_fn=collate_fn,
-            batch_size=1
-    )
-    eval_loader = Evaluator(label='eval',
-                            dataloader=eval_dataloader,
-                            metric_names=['loss', 'accuracy'])
+    train_data, val_data = prepare_dataset(tokenizer)
     
     # model.to(get_device())
-    print('model is cuda', model.device)
-    optimizer = DecoupledAdamW(model.parameters(),
-                              lr=1.0e-5,
-                              betas=(0.9, 0.999),
-                              eps=1.0e-8,
-                              weight_decay=0)
-    scheduler = LinearWithWarmupScheduler(t_warmup='0ba', alpha_f=0)
-    al = algorithms.GradientClipping(clipping_threshold=1.0, clipping_type='norm')
+    # print('model is cuda', model.device)
+
+    training_args = Seq2SeqTrainingArguments(
+        evaluation_strategy="epoch",
+        save_strategy="epoch",
+        eval_steps=10,
+        per_device_train_batch_size=args.batch_size,
+        per_device_eval_batch_size=args.batch_size,
+        num_train_epochs=args.epoch,
+        output_dir=args.out_dir,
+        gradient_accumulation_steps=args.grad_ac,
+        lr_scheduler_type='constant',
+        learning_rate=1e-5,
+        metric_for_best_model = 'eval_loss',
+        load_best_model_at_end = True,
+        save_total_limit=3,
+        fp16 = True
+        )
+    data_collator = DataCollatorForSeq2Seq(tokenizer=tokenizer)  
     trainer = Trainer(
-        run_name='redpajama_dolly_ja',
         model=model,
-        train_dataloader=train_dataloader,
-        eval_dataloader=[eval_loader],        
-        optimizers=optimizer,
-        schedulers=scheduler,
-        algorithms=al,
-        max_duration='1ep',
-        eval_interval=10,
-        log_to_console=True,
-        save_folder=args.out,
-        save_filename='ep{epoch}-ba{batch}-rank{rank}.pt'
-    )
+        args=training_args,
+        train_dataset=train_data,
+        eval_dataset=val_data,
+        tokenizer=tokenizer,
+        data_collator=data_collator,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+        )
     print("train...")
-    # trainer.train(resume)
-    trainer.fit()
+    trainer.train(args.resume)
     print("evaluate...")
+    trainer.evaluate()
+    trainer.save_model()
 
 if __name__ == "__main__":
     main()
