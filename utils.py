@@ -10,8 +10,9 @@ def format(inp):
         prompt = PROMPT_FORMAT.format(instruction=instruction)
         response = inp['output']
     except Exception as e:
-        raise ValueError(
-            f'Unable to extract prompt/response from {inp=}') from e
+        # raise ValueError(
+        #     f'Unable to extract prompt/response from {inp=}') from e
+        raise ValueError('unable to extract prompt/response')            
     return {'prompt': prompt, 'response': response}    
 
 
