@@ -79,6 +79,7 @@ def main():
     # model.to(get_device())
     # print('model is cuda', model.device)
 
+    
     training_args = TrainingArguments(
         evaluation_strategy="epoch",
         save_strategy="epoch",
@@ -94,10 +95,10 @@ def main():
         load_best_model_at_end = True,
         save_total_limit=3,
         fp16 = True,
-        gradient_checkpointing= True,
-        optim="adafactor",
+        gradient_checkpointing= True,        
         warmup_steps=100
         )
+    # optim="adafactor", for row gpu vram
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
         mlm=False
@@ -113,9 +114,13 @@ def main():
         )
     print("train...")
     trainer.train(args.resume)
-    print("evaluate...")
-    trainer.evaluate()
-    trainer.save_model()
+    
+    if args.lora:
+        model.save_pretrained("alpaca-lora-dolly-2.0")
+    else:
+        print("evaluate...")
+        trainer.evaluate()
+        trainer.save_model()
 
 if __name__ == "__main__":
     main()
