@@ -36,9 +36,9 @@ def load_model(model_name):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out_dir', default='/content/MyDrive/models/redpajama_dolly_ja')
-    parser.add_argument('--batch_size', default=1)
-    parser.add_argument('--grad_ac', default=8)
-    parser.add_argument('--epoch', default=10)
+    parser.add_argument('--batch_size', default=1, type=int)
+    parser.add_argument('--grad_ac', default=8, type=int)
+    parser.add_argument('--epoch', default=10, type=int)
     parser.add_argument('--resume', action='store_true')
     args = parser.parse_args()
 
