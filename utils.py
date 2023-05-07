@@ -1,6 +1,7 @@
 from datasets import load_dataset
 
 def format(inp):
+    print('inp:', inp)
     PROMPT_FORMAT = '以下は、あるタスクを記述した指示です。依頼を適切に完了させる回答を書きなさい。\n\n### 指示:\n{instruction}\n\n### 応答:\n'
     try:
         if inp['input'] != '':
@@ -18,8 +19,7 @@ def format(inp):
 
 def prepare_dataset(tokenizer):    
     ds_path = 'https://huggingface.co/datasets/kunishou/databricks-dolly-15k-ja/resolve/main/databricks-dolly-15k-ja.json'
-    ds = load_dataset('json', data_files=ds_path)
-    print(ds['train'][0])
+    ds = load_dataset('json', data_files=ds_path)    
 
     def tokenize_example(example):
         example = format(example)
