@@ -7,7 +7,7 @@ from transformers import (
     Trainer,
     DataCollatorForSeq2Seq,
     DataCollatorForLanguageModeling,
-    Seq2SeqTrainingArguments,
+    TrainingArguments,
     EarlyStoppingCallback
 )
 
@@ -53,7 +53,7 @@ def main():
     # model.to(get_device())
     # print('model is cuda', model.device)
 
-    training_args = Seq2SeqTrainingArguments(
+    training_args = TrainingArguments(
         evaluation_strategy="epoch",
         save_strategy="epoch",
         eval_steps=10,
