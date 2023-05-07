@@ -85,7 +85,7 @@ def main():
         evaluation_strategy="steps",
         eval_steps=100,        
         save_strategy='steps',
-        save_steps=5,
+        save_steps=500,
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
         num_train_epochs=args.epoch,
@@ -114,12 +114,12 @@ def main():
         )
     print("train...")
     trainer.train(args.resume)
-    
+    print("evaluate...")
+    trainer.evaluate()    
     if args.lora:
-        model.save_pretrained("alpaca-lora-dolly-2.0")
-    else:
-        print("evaluate...")
-        trainer.evaluate()
+        print('save as lora...')
+        model.save_pretrained("redpajama-lora-dolly-ja")
+    else:        
         trainer.save_model()
 
 if __name__ == "__main__":
