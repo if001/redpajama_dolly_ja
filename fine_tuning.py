@@ -82,9 +82,9 @@ def main():
 
     
     training_args = TrainingArguments(
-        evaluation_strategy="step",
+        evaluation_strategy="steps",
         eval_steps=100,        
-        save_strategy='step',
+        save_strategy='steps',
         save_steps=5,
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
