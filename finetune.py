@@ -1,9 +1,10 @@
+import argparse
 from typing import Optional, Tuple
 
 import torch
 from torch.utils.data import DataLoader
-from dataclasses import dataclass, field
-from transformers import AutoTokenizer, AutoModelForCausalLM
+# from dataclasses import dataclass, field
+from transformers import AutoTokenizer, AutoModelForCausalLM, DataCollatorForSeq2Seq
 
 from composer import Trainer, algorithms
 from composer.core import Evaluator
@@ -14,12 +15,6 @@ MIN_TRANSFORMERS_VERSION = '4.25.1'
 # check transformers version
 import transformers
 assert transformers.__version__ >= MIN_TRANSFORMERS_VERSION, f'Please upgrade transformers to version {MIN_TRANSFORMERS_VERSION} or higher.'
-
-
-from transformers import (
-    HfArgumentParser,    
-    DataCollatorForSeq2Seq
-)
 
 from utils import (
     prepare_dataset,
@@ -32,25 +27,11 @@ from utils import (
 # max_seq_length = 256
 # max_dataset_length = 200
 
-
-@dataclass
-class ModelArguments:
-    model_name: Optional[str] = field(
-        default=None,
-        metadata={"help": "model name or model path"}
-    )
-    output_model_path: str = field(default=None)
-
-    def __post_init__(self):
-        debug_print(self)
-
-
 def debug_print(s):
     # GREEN = '\033[32m'
     print('\033[32m'+str(s)+'\033[0m')
 
-def load_model(model_name):
-    model_name = "togethercomputer/RedPajama-INCITE-Base-3B-v1"
+def load_model(model_name):    
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name, 
                                                  device_map='auto', 
@@ -59,16 +40,14 @@ def load_model(model_name):
     print("load model:", model_name)
     return tokenizer, model
 
-
-def arg_parse() -> Tuple[ModelArguments]:
-    parser = HfArgumentParser((ModelArguments))
-    model_args = parser.parse_args_into_dataclasses()    
-    return model_args
-
 def main():
-    model_args = arg_parse()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-o', '--out', help='output dir', default='/content/MyDrive/models/redpajama_dolly_ja')
+    args = parser.parse_args()
 
-    tokenizer, model = load_model(model_args.model_name)
+
+    model_name = "togethercomputer/RedPajama-INCITE-Base-3B-v1"
+    tokenizer, model = load_model(model_name)
 
     ds = prepare_dataset(tokenizer)
 
@@ -89,7 +68,7 @@ def main():
                             dataloader=eval_dataloader,
                             metric_names=list(model.train_metrics.keys()))
     
-    model.to(get_device())
+    # model.to(get_device())
     print('model is cuda', model.device)
     optimizer = DecoupledAdamW(model.parameters(),
                               lr=1.0e-5,
@@ -113,8 +92,8 @@ def main():
         max_duration='1ep',
         eval_interval=10,
         log_to_console=True,
-        save_folder=model_args.output_model_path,
-        save_filename=''
+        save_folder=args.out,
+        save_filename='ep{epoch}-ba{batch}-rank{rank}.pt'
     )
     print("train...")
     # trainer.train(resume)
