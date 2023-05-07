@@ -2,3 +2,4 @@ datasets
 transformers
 torch
 accelerate
+git+https://github.com/huggingface/peft.git

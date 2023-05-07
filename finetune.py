@@ -34,6 +34,28 @@ def load_model(model_name):
     print("load model:", model_name)
     return tokenizer, model
 
+def with_lora(model):
+    from peft import prepare_model_for_int8_training, LoraConfig, get_peft_model
+    print('load with lora...')
+
+    model = prepare_model_for_int8_training(model, 
+                                            use_gradient_checkpointing=True)    
+    LORA_R=16
+    LORA_ALPHA=32
+    LORA_DROPOUT=0.05
+    config = LoraConfig(
+        r=LORA_R,
+        lora_alpha=LORA_ALPHA,
+        lora_dropout=LORA_DROPOUT,
+        bias="none",
+        task_type="CAUSAL_LM",
+        fan_in_fan_out=False,
+        target_modules = ["query_key_value"],
+    )
+    model = get_peft_model(model, config)
+    return model
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out_dir', default='/content/MyDrive/models/redpajama_dolly_ja')
@@ -41,12 +63,16 @@ def main():
     parser.add_argument('--grad_ac', default=8, type=int)
     parser.add_argument('--epoch', default=10, type=int)
     parser.add_argument('--resume', action='store_true')
+    parser.add_argument('--lora', action='store_true')
     args = parser.parse_args()
 
 
     model_name = "togethercomputer/RedPajama-INCITE-Base-3B-v1"
     tokenizer, model = load_model(model_name)
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+
+    if args.lora:
+        model = with_lora(model)
 
     train_dataset = prepare_dataset(tokenizer)
     
