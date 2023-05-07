@@ -68,7 +68,11 @@ def main():
         save_total_limit=3,
         fp16 = True
         )
-    data_collator = DataCollatorForSeq2Seq(tokenizer=tokenizer)  
+    data_collator = DataCollatorForSeq2Seq(
+        tokenizer=tokenizer,
+        padding=True,
+        max_length=2048,
+        )  
     trainer = Trainer(
         model=model,
         args=training_args,
