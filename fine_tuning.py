@@ -29,6 +29,7 @@ def debug_print(s):
 def load_model(model_name):    
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name, 
+                                                load_in_8bit=True,
                                                  device_map='auto', 
                                                  torch_dtype=torch.float16)                                                 
     print("load model:", model_name)
@@ -112,7 +113,7 @@ def main():
         data_collator=data_collator        
         )
     print("train...")
-    trainer.train(resume_from_checkpoin=False)
+    trainer.train(args.resume)
     
     if args.lora:
         model.save_pretrained("alpaca-lora-dolly-2.0")
