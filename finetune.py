@@ -12,6 +12,7 @@ from composer.optim.scheduler import LinearWithWarmupScheduler
 
 MIN_TRANSFORMERS_VERSION = '4.25.1'
 # check transformers version
+import transformers
 assert transformers.__version__ >= MIN_TRANSFORMERS_VERSION, f'Please upgrade transformers to version {MIN_TRANSFORMERS_VERSION} or higher.'
 
 
