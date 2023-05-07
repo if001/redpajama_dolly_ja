@@ -109,6 +109,7 @@ def main():
         model=model,
         args=training_args,
         train_dataset=train_dataset['train'],
+        eval_dataset=train_dataset['test'],
         tokenizer=tokenizer,
         data_collator=data_collator        
         )

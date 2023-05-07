@@ -35,6 +35,7 @@ def prepare_dataset(tokenizer):
         tokenize_example, 
         batched=False
     )
+    ds = ds['train'].train_test_split(test_size=0.1)
     return ds
 
 def get_device():    
