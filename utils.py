@@ -1,7 +1,7 @@
 from datasets import load_dataset
 
 def format(inp):
-    print('inp:', inp)
+    print('inp:', inp['instruction'])
     PROMPT_FORMAT = '以下は、あるタスクを記述した指示です。依頼を適切に完了させる回答を書きなさい。\n\n### 指示:\n{instruction}\n\n### 応答:\n'
     try:
         if inp['input'] != '':
@@ -28,7 +28,7 @@ def prepare_dataset(tokenizer):
     # columns_to_remove = list(ds[0].keys())
     ds = ds.map(
         tokenize_example, 
-        batched=True        
+        batched=False
     )
     
     # print("data_set:", len(ds))    
