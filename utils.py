@@ -24,11 +24,10 @@ def prepare_dataset(tokenizer):
         example = format(example)
         tokenizer(text=example['prompt'], text_target=example['response'])
         return example
-    columns_to_remove = list(ds[0].keys())
+    # columns_to_remove = list(ds[0].keys())
     ds = ds.map(
         tokenize_example, 
-        batched=True,
-        remove_columns=columns_to_remove
+        batched=True        
     )
     
     # print("data_set:", len(ds))    
