@@ -6,6 +6,7 @@ from transformers import (
     AutoModelForCausalLM,
     Trainer,
     DataCollatorForSeq2Seq,
+    DataCollatorForLanguageModeling,
     Seq2SeqTrainingArguments,
     EarlyStoppingCallback
 )
@@ -71,8 +72,9 @@ def main():
         optim="adafactor",
         warmup_steps=100
         )
-    data_collator = DataCollatorForSeq2Seq(
+    data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
+        mlm=False
         )  
     trainer = Trainer(
         model=model,
