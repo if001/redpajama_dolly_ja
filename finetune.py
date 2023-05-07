@@ -75,10 +75,7 @@ def main():
                               eps=1.0e-8,
                               weight_decay=0)
     scheduler = LinearWithWarmupScheduler(t_warmup='0ba', alpha_f=0)
-    al = algorithms.GradientClipping({
-        'clipping_type': 'norm',
-        'clipping_threshold': 1.0
-    })
+    al = algorithms.GradientClipping(clipping_threshold=1.0, clipping_type='norm')
     trainer = Trainer(
         run_name='redpajama_dolly_ja',
         model=model,
