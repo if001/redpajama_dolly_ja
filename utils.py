@@ -15,7 +15,7 @@ def format(inp):
         #     f'Unable to extract prompt/response from {inp=}') from e
         raise ValueError('unable to extract prompt/response')            
     # return {'prompt': prompt, 'response': response}    
-    return prompt + '\n' + response
+    return prompt + response
 
 def prepare_dataset(tokenizer):
     ds = load_dataset('kunishou/databricks-dolly-15k-ja')
@@ -23,7 +23,7 @@ def prepare_dataset(tokenizer):
     def tokenize_example(example):
         example = format(example)
         return tokenizer(
-            example,            
+            example,
             truncation=True,
             max_length=2048,
             padding="max_length"
