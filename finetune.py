@@ -67,7 +67,7 @@ def main():
         metric_for_best_model = 'eval_loss',
         load_best_model_at_end = True,
         save_total_limit=3,
-        fp16 = True,
+        fp16 = False,
         gradient_checkpointing= True,
         optim="adafactor",
         warmup_steps=100
