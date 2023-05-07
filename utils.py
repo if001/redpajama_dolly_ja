@@ -17,6 +17,8 @@ def format(inp):
     # return {'prompt': prompt, 'response': response}    
     return prompt + response
 
+# CUTOFF_LEN=2048
+CUTOFF_LEN=1024
 def prepare_dataset(tokenizer):
     ds = load_dataset('kunishou/databricks-dolly-15k-ja')
 
@@ -25,7 +27,7 @@ def prepare_dataset(tokenizer):
         return tokenizer(
             example,
             truncation=True,
-            max_length=2048,
+            max_length=CUTOFF_LEN,
             padding="max_length"
         )
     # columns_to_remove = list(ds[0].keys())
