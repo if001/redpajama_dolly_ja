@@ -45,6 +45,7 @@ def main():
 
     model_name = "togethercomputer/RedPajama-INCITE-Base-3B-v1"
     tokenizer, model = load_model(model_name)
+    tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
     train_data, val_data = prepare_dataset(tokenizer)
     
