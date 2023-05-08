@@ -71,6 +71,10 @@ def main():
     model_name = "togethercomputer/RedPajama-INCITE-Base-3B-v1"
     tokenizer, model = load_model(model_name)
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+    tokenizer.pad_token_id = (
+        0  # unk. we want this to be different from the eos token
+    )
+    tokenizer.padding_side = "left"  # Allow batched inference
 
     if args.lora:
         model = with_lora(model)
@@ -83,7 +87,7 @@ def main():
     
     training_args = TrainingArguments(
         evaluation_strategy="steps",
-        eval_steps=100,        
+        eval_steps=500,
         save_strategy='steps',
         save_steps=500,
         per_device_train_batch_size=args.batch_size,
@@ -96,13 +100,13 @@ def main():
         metric_for_best_model = 'eval_loss',
         save_total_limit=3,
         fp16 = True,
-        gradient_checkpointing= True,        
-        warmup_steps=100
-        )
+        gradient_checkpointing= True,
+        warmup_steps=100,
+        optim="adamw_torch",
+    )
     # optim="adafactor", for row gpu vram
-    data_collator = DataCollatorForLanguageModeling(
-        tokenizer=tokenizer,
-        mlm=False
+    data_collator = DataCollatorForSeq2Seq(
+            tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
         )
     model.config.use_cache = False
     trainer = Trainer(
@@ -111,7 +115,7 @@ def main():
         train_dataset=train_dataset['train'],
         eval_dataset=train_dataset['test'],
         tokenizer=tokenizer,
-        data_collator=data_collator        
+        data_collator=data_collator
         )
     print("train...")
     trainer.train(args.resume)

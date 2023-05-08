@@ -1,7 +1,7 @@
 from datasets import load_dataset
 import torch
 
-def format(inp):    
+def format_text(inp):    
     PROMPT_FORMAT = '以下は、あるタスクを記述した指示です。質問に対する適切な回答を書きなさい。\n\n### 指示:\n{instruction}\n\n### 応答:\n'
     try:
         if inp['input'] != '':
@@ -23,19 +23,25 @@ def prepare_dataset(tokenizer):
     ds = load_dataset('kunishou/databricks-dolly-15k-ja')
 
     def tokenize_example(example):
-        example = format(example)
-        return tokenizer(
+        example = format_text(example)
+        result = tokenizer(
             example,
             truncation=True,
-            max_length=CUTOFF_LEN,
-            padding="max_length"
+            padding=False,
+            return_tensors=None,
+            max_length=CUTOFF_LEN
         )
-    # columns_to_remove = list(ds[0].keys())
-    ds = ds.shuffle().map(
-        tokenize_example, 
-        batched=False
-    )
-    ds = ds['train'].train_test_split(test_size=0.1)
+        if (
+            result["input_ids"][-1] != tokenizer.eos_token_id
+            and len(result["input_ids"]) < CUTOFF_LEN
+        ):
+            result["input_ids"].append(tokenizer.eos_token_id)
+            result["attention_mask"].append(1)
+        result["labels"] = result["input_ids"].copy()
+        return result
+    
+    ds = ds.shuffle().map(tokenize_example)
+    ds = ds['train'].train_test_split(test_size=0.1, shuffle=True)
     return ds
 
 def get_device():    
