@@ -89,7 +89,7 @@ def main():
         evaluation_strategy="steps",
         eval_steps=500,
         save_strategy='steps',
-        save_steps=500,
+        save_steps=1000,
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
         num_train_epochs=args.epoch,
