@@ -136,7 +136,7 @@ def main():
     print("train...")
     resume = args.lora_weight != None
     print(f'resume: {resume}')
-    trainer.train(resume)
+    trainer.train(resume_from_checkpoint=resume)
     print("evaluate...")
     trainer.evaluate()    
     if args.lora:
