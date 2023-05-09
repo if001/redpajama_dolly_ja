@@ -24,6 +24,9 @@ def debug_print(s):
 
 def load_model(model_name):    
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer.pad_token_id = 0
+    tokenizer.padding_side = "left"
+
     quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
 
     model = AutoModelForCausalLM.from_pretrained(model_name, 
@@ -31,7 +34,7 @@ def load_model(model_name):
                                                 device_map='auto', 
                                                 torch_dtype=torch.float16,
                                                 quantization_config=quantization_config,
-                                                 )                                                 
+                                                )
     print("load model:", model_name)
     return tokenizer, model
 
@@ -39,8 +42,9 @@ def with_lora(model):
     from peft import prepare_model_for_int8_training, LoraConfig, get_peft_model
     print('load with lora...')
 
-    model = prepare_model_for_int8_training(model, 
-                                            use_gradient_checkpointing=True)    
+    # model = prepare_model_for_int8_training(model, 
+    #                                         use_gradient_checkpointing=True)
+
     # LORA_R=16
     # LORA_ALPHA=32
     LORA_R=8
@@ -72,12 +76,7 @@ def main():
 
 
     model_name = "togethercomputer/RedPajama-INCITE-Base-3B-v1"
-    tokenizer, model = load_model(model_name)
-    tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-    tokenizer.pad_token_id = (
-        0  # unk. we want this to be different from the eos token
-    )
-    tokenizer.padding_side = "left"  # Allow batched inference
+    tokenizer, model = load_model(model_name)    
 
     if args.lora:
         model = with_lora(model)
