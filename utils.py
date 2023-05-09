@@ -24,6 +24,7 @@ def prepare_dataset(tokenizer):
 
     def tokenize_example(example):
         example = format_text(example)
+        print(example)
         result = tokenizer(
             example,
             truncation=True,

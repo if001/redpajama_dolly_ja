@@ -61,6 +61,15 @@ def with_lora(model):
     model = get_peft_model(model, config)
     return model
 
+def resume_lora(model, weight_path):
+    from peft import PeftModel
+    print(f"resume lora...{weight_path}")
+    model = PeftModel.from_pretrained(
+        model,
+        weight_path,
+        torch_dtype=torch.float16,
+    )
+    return model
 
 def main():
     parser = argparse.ArgumentParser()
@@ -69,7 +78,7 @@ def main():
     parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--grad_ac', default=8, type=int)
     parser.add_argument('--epoch', default=10, type=int)
-    parser.add_argument('--resume', action='store_true')
+    parser.add_argument('--lora_weight', type=str, default=None)
     parser.add_argument('--lora', action='store_true')
     args = parser.parse_args()
 
@@ -78,8 +87,11 @@ def main():
     tokenizer, model = load_model(model_name)    
 
     if args.lora:
-        model = with_lora(model)
-        model.save_pretrained(args.out_lora_dir)
+        if args.lora_weight:
+            model = resume_lora(model, args.lora_weight)
+        else:
+            model = with_lora(model)
+        # model.save_pretrained(args.out_lora_dir)
 
     train_dataset = prepare_dataset(tokenizer)
     
@@ -122,7 +134,9 @@ def main():
         data_collator=data_collator
         )
     print("train...")
-    trainer.train(args.resume)
+    resume = args.lora_weight != None
+    print(f'resume: {resume}')
+    trainer.train(resume)
     print("evaluate...")
     trainer.evaluate()    
     if args.lora:
