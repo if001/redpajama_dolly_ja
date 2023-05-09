@@ -61,18 +61,6 @@ def with_lora(model):
     model = get_peft_model(model, config)
     return model
 
-def resume_lora(model, weight_path):
-    from peft import PeftModel, prepare_model_for_int8_training
-    print(f"resume lora...{weight_path}")
-    model = prepare_model_for_int8_training(model, 
-                                            use_gradient_checkpointing=True)
-    model = PeftModel.from_pretrained(
-        model,
-        weight_path,
-        torch_dtype=torch.float16,
-    )
-    return model
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out_dir', default='/content/MyDrive/models/redpajama_dolly_ja')
@@ -80,7 +68,6 @@ def main():
     parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--grad_ac', default=8, type=int)
     parser.add_argument('--epoch', default=10, type=int)
-    parser.add_argument('--lora_weight', type=str, default=None)
     parser.add_argument('--lora', action='store_true')
     args = parser.parse_args()
 
@@ -89,10 +76,7 @@ def main():
     tokenizer, model = load_model(model_name)    
 
     if args.lora:
-        if args.lora_weight:
-            model = resume_lora(model, args.lora_weight)
-        else:
-            model = with_lora(model)
+        model = with_lora(model)
         # model.save_pretrained(args.out_lora_dir)
 
     train_dataset = prepare_dataset(tokenizer)
@@ -136,11 +120,9 @@ def main():
         data_collator=data_collator
         )
     print("train...")
-    resume = args.lora_weight != None
-    print(f'resume: {resume}')
-    trainer.train(resume_from_checkpoint=resume)
+    trainer.train()
     print("evaluate...")
-    trainer.evaluate()    
+    trainer.evaluate()
     if args.lora:
         args.out_dir
         print('save as lora...')
