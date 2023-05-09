@@ -27,13 +27,12 @@ def load_model(model_name):
     tokenizer.pad_token_id = 0
     tokenizer.padding_side = "left"
 
-    quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
+    # quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
 
     model = AutoModelForCausalLM.from_pretrained(model_name, 
                                                 load_in_8bit=True,
                                                 device_map='auto', 
-                                                torch_dtype=torch.float16,
-                                                quantization_config=quantization_config,
+                                                torch_dtype=torch.float16                                                
                                                 )
     print("load model:", model_name)
     return tokenizer, model
