@@ -124,7 +124,6 @@ def main():
     print("evaluate...")
     trainer.evaluate()
     if args.lora:
-        args.out_dir
         print('save as lora...')
         model.save_pretrained(args.out_lora_dir)
     else:        
