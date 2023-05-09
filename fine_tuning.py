@@ -62,8 +62,10 @@ def with_lora(model):
     return model
 
 def resume_lora(model, weight_path):
-    from peft import PeftModel
+    from peft import PeftModel, prepare_model_for_int8_training
     print(f"resume lora...{weight_path}")
+    model = prepare_model_for_int8_training(model, 
+                                            use_gradient_checkpointing=True)
     model = PeftModel.from_pretrained(
         model,
         weight_path,
