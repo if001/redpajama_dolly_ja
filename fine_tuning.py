@@ -60,6 +60,7 @@ def with_lora(model):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out_dir', default='/content/MyDrive/models/redpajama_dolly_ja')
+    parser.add_argument('--out_lora_dir', default='/content/MyDrive/models/redpajama_dolly_ja/lora')
     parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--grad_ac', default=8, type=int)
     parser.add_argument('--epoch', default=10, type=int)
@@ -78,25 +79,26 @@ def main():
 
     if args.lora:
         model = with_lora(model)
+        model.save_pretrained(args.out_lora_dir)
 
     train_dataset = prepare_dataset(tokenizer)
     
     # model.to(get_device())
     # print('model is cuda', model.device)
-
     
+    learning_rate=1e-5
     training_args = TrainingArguments(
         evaluation_strategy="steps",
         eval_steps=500,
         save_strategy='steps',
-        save_steps=1000,
+        save_steps=500,
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
         num_train_epochs=args.epoch,
         output_dir=args.out_dir,
         gradient_accumulation_steps=args.grad_ac,
         lr_scheduler_type='constant',
-        learning_rate=1e-5,
+        learning_rate=learning_rate,
         metric_for_best_model = 'eval_loss',
         save_total_limit=3,
         fp16 = True,
@@ -122,8 +124,9 @@ def main():
     print("evaluate...")
     trainer.evaluate()    
     if args.lora:
+        args.out_dir
         print('save as lora...')
-        model.save_pretrained("redpajama-lora-dolly-ja")
+        model.save_pretrained(args.out_lora_dir)
     else:        
         trainer.save_model()
 
