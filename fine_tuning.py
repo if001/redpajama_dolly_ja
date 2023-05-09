@@ -8,7 +8,8 @@ from transformers import (
     DataCollatorForSeq2Seq,
     DataCollatorForLanguageModeling,
     TrainingArguments,
-    EarlyStoppingCallback
+    EarlyStoppingCallback,
+    BitsAndBytesConfig
 )
 
 from utils import (
@@ -16,11 +17,6 @@ from utils import (
     get_device
 )
 
-# max_seq_length = 256
-# max_dataset_length = 80000
-
-# max_seq_length = 256
-# max_dataset_length = 200
 
 def debug_print(s):
     # GREEN = '\033[32m'
@@ -28,10 +24,14 @@ def debug_print(s):
 
 def load_model(model_name):    
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
+
     model = AutoModelForCausalLM.from_pretrained(model_name, 
                                                 load_in_8bit=True,
-                                                 device_map='auto', 
-                                                 torch_dtype=torch.float16)                                                 
+                                                device_map='auto', 
+                                                torch_dtype=torch.float16,
+                                                quantization_config=quantization_config,
+                                                 )                                                 
     print("load model:", model_name)
     return tokenizer, model
 
@@ -41,8 +41,10 @@ def with_lora(model):
 
     model = prepare_model_for_int8_training(model, 
                                             use_gradient_checkpointing=True)    
-    LORA_R=16
-    LORA_ALPHA=32
+    # LORA_R=16
+    # LORA_ALPHA=32
+    LORA_R=8
+    LORA_ALPHA=16
     LORA_DROPOUT=0.05
     config = LoraConfig(
         r=LORA_R,
@@ -86,7 +88,9 @@ def main():
     # model.to(get_device())
     # print('model is cuda', model.device)
     
-    learning_rate=1e-5
+    # learning_rate=1e-5
+    learning_rate=3e-4
+    # 
     training_args = TrainingArguments(
         evaluation_strategy="steps",
         eval_steps=500,
@@ -99,7 +103,7 @@ def main():
         gradient_accumulation_steps=args.grad_ac,
         lr_scheduler_type='constant',
         learning_rate=learning_rate,
-        metric_for_best_model = 'eval_loss',
+        metric_for_best_model = 'eval_loss',        
         save_total_limit=3,
         fp16 = True,
         gradient_checkpointing= True,
