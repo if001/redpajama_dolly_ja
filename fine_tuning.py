@@ -41,8 +41,8 @@ def with_lora(model):
     from peft import prepare_model_for_int8_training, LoraConfig, get_peft_model
     print('load with lora...')
 
-    # model = prepare_model_for_int8_training(model, 
-    #                                         use_gradient_checkpointing=True)
+    model = prepare_model_for_int8_training(model, 
+                                             use_gradient_checkpointing=True)
 
     # LORA_R=16
     # LORA_ALPHA=32
