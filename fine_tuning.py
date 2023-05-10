@@ -72,7 +72,8 @@ def main():
     args = parser.parse_args()
 
 
-    model_name = "togethercomputer/RedPajama-INCITE-Base-3B-v1"
+    # model_name = "togethercomputer/RedPajama-INCITE-Base-3B-v1"
+    model_name = "togethercomputer/RedPajama-INCITE-Base-7B-v0.1"
     tokenizer, model = load_model(model_name)    
 
     if args.lora:
